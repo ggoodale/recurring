@@ -1,5 +1,5 @@
 require 'rubygems'
-require_gem 'rspec'
+gem 'rspec'
 require File.dirname(__FILE__) + "/../lib/date_language"
 #require 'yaml'
 
