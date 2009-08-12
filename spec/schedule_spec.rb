@@ -350,17 +350,24 @@ end
 describe "A monthly schedule with week params and weekday params" do
 
   setup do
-    @rs = Recurring::Schedule.new :unit => 'months', :weeks => 1, :weekdays => :monday
+    @rs = Recurring::Schedule.new :unit => 'months', :weeks => 1, :weekdays => :saturday
   end
 
   it "should include the beginnings of matching days" do
-    @rs.should include(Time.utc(2006,12,4))
+    @rs.should include(Time.utc(2006,12,2))
   end
 
   it "should not include the matching days in off weeks" do
-    @rs.should_not include(Time.utc(2006,12,18))
-    @rs.should_not include(Time.utc(2006,11,27))
+    @rs.should_not include(Time.utc(2006,12,23))
+    @rs.should_not include(Time.utc(2006,12,9))
   end
+
+  it "should have a next occurrence date no more than 38 days in the future" do
+    # August 4, 2009 is a Saturday. So is September 5.  Calling next()
+    # in 0.5.2 would return Nov. 7, 2009 as the next occurrence.
+    @rs.find_next(Time.utc(2009,8,2)).should == Time.utc(2009,9,5)
+  end
+
 
 end
 

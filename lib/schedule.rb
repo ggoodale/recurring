@@ -3,9 +3,20 @@ module Recurring
   VERSION = '0.5.2'
   
   class << self
-    # returns a number starting with 1
+    # returns a number starting with 1.  Needs to assume that weeks start on sunday
+    # for beginning_of_next to work at the scale of weeks.
     def week_in_month date
-      (((date.day - 1).to_f / 7.0) + 1).floor
+      # Work out the first date in the month
+      first_of_month = date - ((date.day - 1) * 86400)
+      
+      # If the month starts on a Sunday, we're good.
+      if first_of_month.wday == 0
+        adjusted_day = date.day
+      else
+        # Otherwise, we need to offset by whatever partial week starts this month.
+        adjusted_day = date.day + first_of_month.wday
+      end
+      (((adjusted_day - 1).to_f / 7.0) + 1).floor 
     end
 
     def negative_week_in_month date
@@ -207,6 +218,7 @@ module Recurring
       	when :week
       	  to_sunday = 7 - date.wday
       	  next_week = (date + to_sunday*24*60*60)
+      	  next_week = next_week - ((next_week.day - 1) * 86400) if next_week.month != date.month
       	  Time.utc(next_week.year, next_week.month, next_week.day)
       	when :day
       	  dayp = date + (24*60*60)

@@ -1,3 +1,7 @@
+== 0.5.3 / 2009-8-12
+
+* fixed issue with schedules of the form 'every n months on the first <weekday>' due to inconsistent handling of week starting day.
+
 == 0.5.2 / 2008-3-7
 
 * fixes to time corner-cases. 
