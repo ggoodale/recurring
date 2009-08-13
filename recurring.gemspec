@@ -5,12 +5,11 @@ Gem::Specification.new do |s|
   s.version = "0.5.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Chris Anderson", "Grant Goodale"]
-  s.autorequire = %q{recurring}
+  s.authors = ["Chris Anderson"]
   s.date = %q{2006-12-11}
   s.description = %q{Recurring allows you to define Schedules, which can tell you whether or not a given Time falls in the Schedule, as well as being able to return a list of times which match the Schedule within a given range.}
   s.email = %q{jchris@mfdz.com}
-  s.files = ["History.txt", "Manifest.txt", "README.txt", "Rakefile", "lib/recurring.rb", "spec/date_language_spec.rb", "spec/schedule_spec.rb"]
+  s.files = ["History.txt", "Manifest.txt", "README.txt", "Rakefile", "lib/recurring.rb", "lib/date_language.rb", "lib/schedule.rb", "spec/date_language_spec.rb", "spec/schedule_spec.rb"]
   s.homepage = %q{http://jchris.mfdz.com}
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.3}
