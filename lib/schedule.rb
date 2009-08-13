@@ -1,6 +1,6 @@
 module Recurring
 
-  VERSION = '0.5.3'
+  VERSION = '0.5.4'
   
   class << self
     # returns a number starting with 1.  Needs to assume that weeks start on sunday
