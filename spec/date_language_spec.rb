@@ -1,10 +1,7 @@
-require 'rubygems'
-gem 'rspec'
 require File.dirname(__FILE__) + "/../lib/date_language"
-#require 'yaml'
 
 context "Every two days from 2006/11/3" do
-  setup do
+  before do
     @rdl = Recurring::DateLanguage.tell do
       every 2, :days, :anchor => Time.utc(2006,11,3)
       times '4:45am 3pm'

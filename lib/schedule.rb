@@ -1,30 +1,28 @@
 module Recurring
 
-  VERSION = '0.5.4'
+  VERSION = '0.5.5'
   
   class << self
-    # returns a number starting with 1.  Needs to assume that weeks start on sunday
-    # for beginning_of_next to work at the scale of weeks.
-    def week_in_month date
-      # Work out the first date in the month
-      first_of_month = date - ((date.day - 1) * 86400)
-      
-      # If the month starts on a Sunday, we're good.
-      if first_of_month.wday == 0
-        adjusted_day = date.day
-      else
-        # Otherwise, we need to offset by whatever partial week starts this month.
-        adjusted_day = date.day + first_of_month.wday
-      end
-      (((adjusted_day - 1).to_f / 7.0) + 1).floor 
+    
+    # For a given date, returns the cardinality of the day of the week for the specific month.
+    # e.g. for September 2009:
+    #   nth_instance_of_day_in_month(Time.utc(2006,9,7)) #=> 1
+    #   nth_instance_of_day_in_month(Time.utc(2006,9,8)) #=> 2
+    #
+    def nth_instance_of_day_in_month(date)
+      return ((date.day - 1) / 7) + 1
     end
 
-    def negative_week_in_month date
-    	end_of_month = (date.month < 12 ? Time.utc(date.year, date.month+1) : Time.utc(date.year + 1)) - 3600
-      
-      (((end_of_month.day - date.day).to_f / 7.0) + 1).floor * -1
+    # The same as above, but work backward from the end of the month.
+    def nth_negative_instance_of_day_in_month(date)
+      # How many days are there in this month? We'll grab the first of next month, then roll
+      # back a day to see.
+      next_month = Time.utc(date.year, (date.month % 12) + 1)
+      next_month = Time.utc(next_month.year + 1, next_month.month) if next_month < date
+      month_days = (next_month - 86400).day
+      return -1 - ((month_days - date.day) / 7)
     end
-
+    
     # just a wrapper for strftime
     def week_of_year date
     	date.strftime('%U').to_i
@@ -313,13 +311,21 @@ module Recurring
 	      true
       end
 
+      # This method is a bit of a problem.  Most of the time, when people say 'Every month on the 
+      # first Sunday', they really mean every month; not every month in which the first week of the 
+      # month contains a Sunday (which is what this method was actually doing).
+      # 
+      # I've changed this to match what I think a user's expectation would be, which is 'the nth
+      # Sunday of the month, regardless of in what week that falls'.  Note that this only affects 
+      # The second half of the method; the first half is for handling recurrences of the form 'every
+      # n weeks on Sunday'.  --g
       def week_matches? date
 	      if @unit == :weeks 
       	  return true if @frequency == 1
       	  return ((Recurring.week_of_year(date) - Recurring.week_of_year(@anchor)) % @frequency) == 0
       	end
       	if @weeks
-      	  @weeks.include?(Recurring.week_in_month(date)) || @weeks.include?(Recurring.negative_week_in_month(date))
+      	  @weeks.include?(Recurring.nth_instance_of_day_in_month(date)) || @weeks.include?(Recurring.nth_negative_instance_of_day_in_month(date))
       	else
       	  true
       	end

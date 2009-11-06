@@ -1,5 +1,3 @@
-require 'rubygems'
-gem 'rspec'
 require File.dirname(__FILE__) + "/../lib/recurring"
 require 'yaml'
 
@@ -102,7 +100,7 @@ describe "Initializing a Schedule" do
 end
 
 describe "A complex Schedule" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'months', :frequency => 2, :anchor => Time.utc(2006,4,15,10,30), :monthdays => [3,7], :times => '5pm 4:45:12am'
   end
   
@@ -131,7 +129,7 @@ end
 
 #YEARS
 describe "A basic yearly schedule" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'years', :frequency => 1, :anchor => Time.utc(2008,3,6)
   end
 
@@ -150,7 +148,7 @@ describe "A basic yearly schedule" do
 end
 
 describe "A basic bi-yearly schedule" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'years', :frequency => 2, :anchor => Time.utc(2008,3,6)
   end
 
@@ -161,7 +159,7 @@ describe "A basic bi-yearly schedule" do
 end
 
 describe "A yearly schedule with month and monthdays" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'years', :months => 'feb', :monthdays => [4]
   end
   
@@ -180,7 +178,7 @@ describe "A yearly schedule with month and monthdays" do
 end
 
 describe "A yearly schedule with months and weekdays" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'years', :months => 'feb', :weekdays => ['tuesday', 'weds']
   end
   it "should match every tuesday and wednesday in febraury" do
@@ -207,7 +205,7 @@ describe "A yearly schedule with months and weekdays" do
 end
 
 describe "A bi-yearly schedule with months, weeks, weekdays, and times" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'years', :frequency => 2, :anchor => Time.utc(2006,6), :months => ['feb', 'may'], :weeks => [2], :weekdays => 'fri', :times => '5:15'
   end
   
@@ -228,7 +226,7 @@ end
 
 describe "A bi-monthly Schedule without more params" do
 
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'months', :frequency => 2, :anchor => Time.utc(2006,4,15,10,30)
   end
 
@@ -266,7 +264,7 @@ describe "A bi-monthly Schedule without more params" do
 end
 
 describe "A monthly schedule with monthday params" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'months', :monthdays => [1,15]
     #    @rs.anchor = Time.utc(2006,6,18,12,30) #should react appropriately to the presence of a (no longer useless) anchor
   end
@@ -301,7 +299,7 @@ end
 
 describe "A bi-monthly Schedule with monthday params" do
 
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'months', :frequency => 2, :anchor => Time.utc(2006,4,15,10,30), :monthdays => [10,18]
   end
 
@@ -337,7 +335,7 @@ end
 
 describe "A third-monthly schedule with week params" do
   
-    setup do
+    before do
       lambda{@rs = Recurring::Schedule.new :unit => 'months', :week => 1, :frequency => 3}.should raise_error(ArgumentError)
     end
 
@@ -349,26 +347,25 @@ end
 
 describe "A monthly schedule with week params and weekday params" do
 
-  setup do
-    @rs = Recurring::Schedule.new :unit => 'months', :weeks => 1, :weekdays => :saturday
+  before do
+    @rs = Recurring::Schedule.new :unit => 'months', :weeks => 1, :weekdays => :sunday
   end
 
   it "should include the beginnings of matching days" do
-    @rs.should include(Time.utc(2006,12,2))
+    @rs.should include(Time.utc(2006,12,3))
   end
 
   it "should not include the matching days in off weeks" do
-    @rs.should_not include(Time.utc(2006,12,23))
-    @rs.should_not include(Time.utc(2006,12,9))
+    @rs.should_not include(Time.utc(2006,12,24))
+    @rs.should_not include(Time.utc(2006,12,10))
   end
 
   it "should have a next occurrence date no more than 38 days in the future" do
     # August 4, 2009 is a Saturday. So is September 5.  Calling next()
     # in 0.5.2 would return Nov. 7, 2009 as the next occurrence.
-    @rs.find_next(Time.utc(2009,8,2)).should == Time.utc(2009,9,5)
+    puts @rs.find_next(Time.utc(2009,8,3))
+    @rs.find_next(Time.utc(2009,8,3)).should == Time.utc(2009,9,6)
   end
-
-
 end
 
 describe "A monthly schedule with weekday params but no week params" do
@@ -379,9 +376,8 @@ end
 
 describe "A monthly schedule with negative week params and weekday params" do
 
- setup do
-   @rs = Recurring::Schedule.new :unit => 'months', :weeks => -1,
-:weekdays => :monday
+ before do
+   @rs = Recurring::Schedule.new(:unit => 'months', :weeks => -1, :weekdays => :monday)
  end
   it "should include the beginnings of matching days" do
    @rs.should include(Time.utc(2006,12,25))
@@ -398,7 +394,7 @@ end
 #WEEKLY
 
 describe "A bi-weekly schedule with weekdays and a midnight time" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'weeks', :weekdays => %w{sat sunday}, :times => '12am', :frequency => 2, :anchor => Time.utc(2001)
     @danger = Time.utc(2006,12,17,18)
   end
@@ -420,7 +416,7 @@ describe "A bi-weekly schedule with weekdays and a midnight time" do
 end
 
 describe "A bi-weekly schedule with weekdays and a noon time" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'weeks', :weekdays => %w{sat sunday}, :times => '12pm', :frequency => 2, :anchor => Time.utc(2001)
     @danger = Time.utc(2006,12,17,18)
   end
@@ -442,7 +438,7 @@ end
 
 describe "A weekly schedule with weekday params" do
   
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'weeks', :weekdays => %w{sunday monday weds friday}
   end
 
@@ -466,7 +462,7 @@ describe "A weekly schedule with weekday params" do
 end
 
 describe "A Schedule with uppercase weekdays" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'weeks', :weekdays => %w{Friday}, :anchor => Time.now, :times => '12'
   end
 
@@ -477,7 +473,7 @@ end
 
 describe "A weekly schedule with only an anchor" do
   
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'weeks', :anchor => Time.utc(2006,12,6,17,30)
   end
 
@@ -503,7 +499,7 @@ end
 
 describe "A third-weekly schedule with weekday and times params" do
 
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'weeks', :frequency => 3, :anchor => Time.utc(2006,12,1), :weekdays => %w{mon fri sat}, :times => '3pm' 
   end
 
@@ -569,7 +565,7 @@ end
 
 describe "A daily schedule with no other params" do
 
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'days'
   end
 
@@ -591,7 +587,7 @@ describe "A daily schedule with no other params" do
 end
 
 describe "A daily schedule with an anchor" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'days', :anchor => Time.utc(2006,11,1,10,15,22)
   end
 
@@ -617,7 +613,7 @@ describe "A fourth-daily schedule with only the unit and frequency != 1" do
 end
 
 describe "A daily schedule with a sub-second precise anchor" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'days', :anchor => Time.utc(2006,11,27,0,0,30,45)
   end
   it "should include times equal up to second accuracy" do
@@ -631,7 +627,7 @@ end
 
 describe "A fourth-daily schedule with no other params" do
 
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'days', :frequency => 4, :anchor => Time.utc(2006,11,1,9,30)
   end
 
@@ -670,7 +666,7 @@ end
 
 describe "An hourly schedule with no other params" do
 
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'hours'
   end
 
@@ -686,7 +682,7 @@ describe "An hourly schedule with no other params" do
 end
 
 describe "An hourly schedule with an anchor" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'hours', :anchor => Time.utc(2001,5,15,11,17) 
   end
 
@@ -708,7 +704,7 @@ end
 
 describe "An bi-hourly schedule with time params" do
   
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'hours', :frequency => 2, :times => '0:22 0:13:14', :anchor => Time.utc(2006)
   end
   
@@ -735,7 +731,7 @@ end
 
 describe "An hourly schedule with times params" do
 
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'hours', :times => '0:15 4:30 0:45:30'
   end
 
@@ -776,7 +772,7 @@ end
 #MINUTELY
 
 describe "Every 45 minutes from an anchor" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'minutes', :frequency => 45, :anchor => Time.utc(2006, 12, 1, 10, 30)
   end
   it "should include 45 minute multiples of the anchor time" do
@@ -787,7 +783,7 @@ describe "Every 45 minutes from an anchor" do
 end
 
 describe "A 30 minutely schedule" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'minutes', :frequency => 30, :anchor => Time.utc(2006,1,1,1,15)
   end
   it "should match the very next time after the start" do
@@ -797,7 +793,7 @@ end
 
 describe "A 5-minutely schedule with no other params" do
   
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'minutes', :frequency => 5, :anchor => Time.utc(2006,9,1,10,30)
   end
 
@@ -858,7 +854,7 @@ end
 #ETC
 
 describe "a daily schedule with a time 4:29am" do
-  setup do
+  before do
     @rs = Recurring::Schedule.new :unit => 'days', :times => '4:29am'
   end
   it "should include any day at the time specified" do
