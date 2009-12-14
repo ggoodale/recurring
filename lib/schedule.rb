@@ -1,6 +1,6 @@
 module Recurring
 
-  VERSION = '0.5.5'
+  VERSION = '0.5.6'
   
   class << self
     
@@ -22,7 +22,7 @@ module Recurring
       month_days = (next_month - 86400).day
       return -1 - ((month_days - date.day) / 7)
     end
-    
+
     # just a wrapper for strftime
     def week_of_year date
     	date.strftime('%U').to_i
@@ -74,9 +74,7 @@ module Recurring
         %w{years months weeks days hours minutes}.include?(options[:unit])
       raise ArgumentError, 'frequency > 1 requires an anchor Time' if options[:frequency] && options[:frequency] != 1 && !options[:anchor]
       @unit = options[:unit].to_sym
-      raise ArgumentError, 'weekdays are required with the weeks param, if there are times params' if @unit == :weeks && 
-	options[:times] && 
-	!options[:weekdays]
+      raise ArgumentError, 'weekdays are required with the weeks param, if there are times params' if @unit == :weeks && options[:times] && !options[:weekdays]
       @frequency = options[:frequency] || 1
       @anchor = options[:anchor]
       @times = parse_times options[:times]
@@ -105,7 +103,8 @@ module Recurring
     # Returns true or false depending on whether or not the time is included in the schedule.
     def include? date
       @resolution = nil	
-      return true if check_anchor? && date == @anchor 
+      return true if check_anchor? && date == @anchor  
+      return mismatch(:day) unless day_of_week_matches?(date)
       return mismatch(:year) unless year_matches?(date) if @unit == :years
       return mismatch(:month) unless month_matches?(date) if [:months, :years].include?(@unit)
       return mismatch(:week) unless week_matches?(date) if [:years, :months, :weeks].include?(@unit)
@@ -127,9 +126,9 @@ module Recurring
 
     # Starts from the argument time, and returns the next included time. Returns the argument if it is included in the schedule.
     def find_next date
-      loop do
+      loop do       
       	return date if include?(date)
-      	#puts "#{@resolution} : #{date}"
+      	# puts "#{@resolution} : #{date}"
       	date = beginning_of_next @resolution, date
       end
     end
@@ -330,6 +329,14 @@ module Recurring
       	  true
       	end
       end
+                    
+      def day_of_week_matches? date
+        return @weekdays.include?(date.wday) unless (@weekdays.nil? || @weekdays.empty?)
+      	if @unit == :weeks && check_anchor?
+      	  return @anchor.wday == date.wday    
+      	end
+      	true 
+      end
 
       def day_matches? date
         if @unit == :days 
@@ -338,11 +345,10 @@ module Recurring
         	return (diff / 86400) % @frequency == 0
     	  end
       	return @monthdays.include?(date.day) if @monthdays
-      	return @weekdays.include?(date.wday) if @weekdays
-      	if @unit == :weeks && check_anchor?
-      	  return @anchor.wday == date.wday    
-      	end
-      	return true if check_anchor? && date.day == @anchor.day
+        unless @unit == :weeks
+      	  return false if check_anchor? && date.day != @anchor.day 
+    	  end
+        true
       end
 
       def time_matches? date
